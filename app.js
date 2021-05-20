@@ -19,6 +19,10 @@ connectDB();
 
 const app = express();
 
+//Body Parser
+app.use(express.urlencoded({extended: false})) //to accept form data
+app.use(express.json()); //to accept json data
+
 //Logging
 if (process.env.NODE_ENV === "development") {
   app.use(morgan("dev"));
@@ -48,6 +52,7 @@ app.use(express.static(path.join(__dirname, "public")));
 //Routes
 app.use("/", require("./routes/index"));
 app.use("/auth", require("./routes/auth"));
+app.use("/stories", require("./routes/stories"));
 
 const PORT = process.env.PORT || 3000;
 app.listen(
