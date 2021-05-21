@@ -20,7 +20,7 @@ connectDB();
 const app = express();
 
 //Body Parser
-app.use(express.urlencoded({extended: false})) //to accept form data
+app.use(express.urlencoded({ extended: false })); //to accept form data
 app.use(express.json()); //to accept json data
 
 //Logging
@@ -28,8 +28,23 @@ if (process.env.NODE_ENV === "development") {
   app.use(morgan("dev"));
 }
 
+//HandleBars Helpers
+const { formatDate, stripTags, truncate, editIcon } = require("./helpers/hbs");
+
 //HandleBars
-app.engine(".hbs", exphbs({ defaultLayout: "main", extname: ".hbs" }));
+app.engine(
+  ".hbs",
+  exphbs({
+    helpers: {
+      formatDate,
+      stripTags,
+      truncate,
+      editIcon,
+    },
+    defaultLayout: "main",
+    extname: ".hbs",
+  })
+);
 app.set("view engine", ".hbs");
 
 //Session
@@ -45,6 +60,12 @@ app.use(
 //Passport middleware
 app.use(passport.initialize());
 app.use(passport.session());
+
+//Set global variable
+app.use(function (req, res, next) {
+  res.locals.user = req.user || null;
+  next();
+});
 
 //Static folder: public folder is use by anyone no need to define path
 app.use(express.static(path.join(__dirname, "public")));
