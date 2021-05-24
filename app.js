@@ -4,6 +4,7 @@ const mongoose = require("mongoose");
 const dotenv = require("dotenv"); //This module loads environment variables from a .env file that you create and adds them to the process.env object that is made available to the application.
 const morgan = require("morgan"); //It simplifies the process of logging(console.log,put,get request) requests to your application
 const exphbs = require("express-handlebars"); // To set up template engines
+const methodOverride = require("method-override");
 const passport = require("passport");
 const session = require("express-session"); //You assign the client an ID and it makes all further requests using that ID. Information associated with the client is stored on the server linked to this ID.
 const MongoStore = require("connect-mongo");
@@ -23,13 +24,31 @@ const app = express();
 app.use(express.urlencoded({ extended: false })); //to accept form data
 app.use(express.json()); //to accept json data
 
+// Method override
+app.use(
+  methodOverride(function (req, res) {
+    if (req.body && typeof req.body === "object" && "_method" in req.body) {
+      // look in urlencoded POST bodies and delete it
+      let method = req.body._method;
+      delete req.body._method;
+      return method;
+    }
+  })
+);
+
 //Logging
 if (process.env.NODE_ENV === "development") {
   app.use(morgan("dev"));
 }
 
 //HandleBars Helpers
-const { formatDate, stripTags, truncate, editIcon } = require("./helpers/hbs");
+const {
+  formatDate,
+  stripTags,
+  truncate,
+  editIcon,
+  select,
+} = require("./helpers/hbs");
 
 //HandleBars
 app.engine(
@@ -40,6 +59,7 @@ app.engine(
       stripTags,
       truncate,
       editIcon,
+      select,
     },
     defaultLayout: "main",
     extname: ".hbs",
